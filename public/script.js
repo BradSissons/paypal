@@ -1,7 +1,3 @@
-const { promiseImpl } = require("ejs");
-
-const amountElement = document.getElementById("amount")
-
 paypal.Buttons({
     createOrder: function() {
         return fetch('/create-order', {

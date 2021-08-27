@@ -1,7 +1,10 @@
+require("dotenv").config()
+
 const express = require('express')
 const app = express()
 app.set("view engine", "ejs")
 app.use(express.static("public"))
+app.use(express.json())
 
 const paypal = require('@paypal/checkout-server-sdk')
 const Environment = process.env.NODE_ENV === "production"
