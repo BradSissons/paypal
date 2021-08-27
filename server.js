@@ -4,6 +4,15 @@ app.set("view engine", "ejs")
 app.use(express.static("public"))
 
 const paypal = require('@paypal/checkout-server-sdk')
+const Environment = process.env.NODE_ENV === "production"
+	? paypal.core.LiveEnvironment
+	: paypal.core.SandboxEnvironment
+const paypalClient = new paypal.core.PayPalHttpClient(
+	new Environment(
+		process.env.PAYPAL_CLIENT_ID,
+		process.env.PAYPAL_CLIENT_SECRET
+	)
+)
 
 const storeItems = new Map([
 	[1, { price: 100, name: "Item 1" }],
@@ -11,7 +20,7 @@ const storeItems = new Map([
 ])
 
 app.get('/', (req, res) => {
-	res.render('index', { paypalClientId: 'AbX7relgVWWbg56Y7qC5-uvM0KG7lh1z_zx0xTM0KmCEMDH9bUwLDCgYPSFbYhgB1odFsk24yr7n826g'})
+	res.render('index', { paypalClientId: process.env.PAYPAL_CLIENT_ID})
 })
 
 app.post('/create-order',  async (req, res) => {
@@ -48,6 +57,13 @@ app.post('/create-order',  async (req, res) => {
 			}
 		]
 	})
+
+	try {
+		const order = await paypalClient.execute(request)
+		res.json({ id: order.result.id })
+	} catch (e) {
+		res.status(500).json({ error: e.message })
+	}
 })
 
 app.listen(3000)
